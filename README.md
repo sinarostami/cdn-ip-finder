@@ -24,6 +24,25 @@ Supports: **Akamai · Google CDN · Amazon CloudFront · Microsoft Azure CDN**
 
 ---
 
+## 📸 Screenshots
+
+![Hero](assets/screenshot-hero.png)
+*Header and CDN selector*
+
+![Scanner](assets/screenshot-scanner.png)
+*Full scanner with IP ranges and settings*
+
+![Results](assets/screenshot-results.png)
+*Results table with working IPs and copy bar*
+
+![Dashboard](assets/screenshot-dashboard.png)
+*Dashboard — latency chart and CDN health bars*
+
+![History](assets/screenshot-history.png)
+*Scan history saved in browser*
+
+---
+
 ## 🖥️ `index.html` — Web Scanner (Main Tool)
 
 > The most important file in this project.
@@ -287,6 +306,25 @@ GPL-3.0 — same as ShirOKhorshid and Psiphon
 مجموعه‌ای از ابزارها برای **پیدا کردن، تست و خروجی گرفتن از آی‌پی‌های CDN** که در ایران فیلتر نشده‌اند، جهت استفاده در قابلیت **CDN Fronting** اپلیکیشن [شیروخورشید](https://github.com/shirokhorshid/shirokhorshid-android).
 
 پشتیبانی از: **Akamai · Google CDN · Amazon CloudFront · Microsoft Azure CDN**
+
+---
+
+## 📸 تصاویر
+
+![Hero](assets/screenshot-hero.png)
+*هدر و انتخاب CDN*
+
+![Scanner](assets/screenshot-scanner.png)
+*اسکنر کامل با رنج‌های IP و تنظیمات*
+
+![Results](assets/screenshot-results.png)
+*جدول نتایج با آی‌پی‌های زنده و کپی بار*
+
+![Dashboard](assets/screenshot-dashboard.png)
+*داشبورد — نمودار تأخیر و سلامت CDN*
+
+![History](assets/screenshot-history.png)
+*تاریخچه اسکن‌ها در مرورگر*
 
 ---
 
