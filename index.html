@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDN IP Scanner v2 | شیروخورشید</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Vazirmatn:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg0:#04080f;--bg1:#080e1a;--bg2:#0c1424;--bg3:#111c30;--bg4:#162238;
+  --ac1:#00ffb3;--ac2:#0080ff;--ac3:#ff3e6c;--ac4:#ffb800;--ac5:#9b5cff;
+  --txt:#c8d8ea;--txt2:#6b82a0;--bdr:#1a2840;--bdr2:#243554;
+}
+body{font-family:'Vazirmatn',sans-serif;background:var(--bg0);color:var(--txt);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 10%,rgba(0,128,255,.06) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 90%,rgba(0,255,179,.05) 0%,transparent 60%);pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,255,179,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(0,255,179,.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+.wrap{max-width:1300px;margin:0 auto;padding:20px 24px;position:relative;z-index:1;}
+
+/* HEADER */
+header{text-align:center;padding:48px 0 36px;}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;background:rgba(0,255,179,.07);border:1px solid rgba(0,255,179,.18);color:var(--ac1);font-size:.72rem;letter-spacing:3px;text-transform:uppercase;padding:5px 16px;border-radius:20px;margin-bottom:18px;font-family:'JetBrains Mono',monospace;}
+.eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--ac1);box-shadow:0 0 8px var(--ac1);animation:blink 2s infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+header h1{font-size:2.8rem;font-weight:900;background:linear-gradient(135deg,#fff 0%,var(--ac1) 40%,var(--ac2) 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:12px;}
+header p{color:var(--txt2);font-size:.88rem;line-height:1.8;max-width:580px;margin:0 auto;}
+
+/* ISP BAR */
+.isp-bar{background:var(--bg2);border:1px solid var(--bdr2);border-radius:12px;padding:13px 20px;margin:22px 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.isp-dot{width:9px;height:9px;border-radius:50%;background:var(--ac1);box-shadow:0 0 10px var(--ac1);animation:blink 2s infinite;flex-shrink:0;}
+.isp-lbl{color:var(--txt2);font-size:.78rem;white-space:nowrap;}
+.isp-val{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--ac1);font-weight:600;}
+.isp-pill{margin-right:auto;background:rgba(0,255,179,.06);border:1px solid rgba(0,255,179,.15);border-radius:6px;padding:4px 12px;font-size:.72rem;color:var(--ac1);font-family:'JetBrains Mono',monospace;}
+
+/* TABS */
+.tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:5px;margin-bottom:20px;flex-wrap:wrap;}
+.tab{flex:1;min-width:80px;padding:10px 14px;border-radius:8px;border:none;background:transparent;color:var(--txt2);font-family:'Vazirmatn',sans-serif;font-size:.82rem;font-weight:500;cursor:pointer;transition:all .2s;}
+.tab.on{background:linear-gradient(135deg,rgba(0,255,179,.12),rgba(0,128,255,.12));color:var(--ac1);border:1px solid rgba(0,255,179,.2);}
+.panel{display:none}.panel.on{display:block}
+
+/* CARD */
+.card{background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:22px 24px;margin-bottom:18px;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,255,179,.25),transparent);}
+.ctitle{font-size:.86rem;font-weight:700;color:var(--ac1);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:9px;font-family:'JetBrains Mono',monospace;}
+.ctitle-left{display:flex;align-items:center;gap:9px;}
+
+/* CDN GRID */
+.cdn-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:11px;margin-bottom:16px;}
+.cdn-card{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:15px;cursor:pointer;transition:all .2s;position:relative;user-select:none;}
+.cdn-card:hover{border-color:var(--ac1);transform:translateY(-2px);}
+.cdn-card.on{border-color:var(--ac1);background:rgba(0,255,179,.05);box-shadow:0 0 20px rgba(0,255,179,.07);}
+.cdn-chk{position:absolute;top:9px;left:9px;width:18px;height:18px;border-radius:50%;background:var(--ac1);color:#000;font-size:.6rem;font-weight:800;display:none;align-items:center;justify-content:center;}
+.cdn-card.on .cdn-chk{display:flex;}
+.cdn-emoji{font-size:1.6rem;margin-bottom:7px;}
+.cdn-name{font-weight:700;font-size:.88rem;margin-bottom:3px;}
+.cdn-sub{font-size:.7rem;color:var(--txt2);line-height:1.4;margin-bottom:7px;}
+.pill{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.66rem;font-weight:600;}
+.pg{background:rgba(0,255,179,.1);color:var(--ac1);}
+.py{background:rgba(255,184,0,.1);color:var(--ac4);}
+
+/* SNI LIST */
+.sni-list{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px;}
+.sni-chip{font-family:'JetBrains Mono',monospace;font-size:.7rem;background:rgba(0,128,255,.08);border:1px solid rgba(0,128,255,.2);color:#60a5fa;padding:3px 10px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.sni-chip:hover{background:rgba(0,128,255,.18);border-color:var(--ac2);}
+.sni-chip.sel{background:rgba(0,255,179,.1);border-color:var(--ac1);color:var(--ac1);}
+
+/* RANGE CHIPS */
+.range-wrap{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;max-height:150px;overflow-y:auto;padding-bottom:4px;}
+.range-wrap::-webkit-scrollbar{width:3px;}
+.range-wrap::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+.rchip{background:var(--bg3);border:1px solid var(--bdr);border-radius:7px;padding:5px 11px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--txt2);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.rchip:hover{border-color:var(--ac2);color:var(--ac2);}
+.rchip.on{border-color:var(--ac1);color:var(--ac1);background:rgba(0,255,179,.05);}
+.rchip-tag{font-size:.58rem;padding:1px 5px;border-radius:3px;background:var(--bg4);color:var(--txt2);}
+
+/* PRESETS */
+.preset-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.preset-btn{padding:8px 16px;background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;color:var(--txt2);font-family:'Vazirmatn',sans-serif;font-size:.78rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.preset-btn:hover{border-color:var(--ac1);color:var(--ac1);}
+
+/* SETTINGS */
+.settings-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:12px;}
+.fg label{display:block;margin-bottom:5px;color:var(--txt2);font-size:.72rem;font-family:'JetBrains Mono',monospace;}
+input,select,textarea{width:100%;padding:9px 12px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;color:var(--txt);font-family:inherit;font-size:.86rem;transition:border-color .2s,box-shadow .2s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--ac1);box-shadow:0 0 0 3px rgba(0,255,179,.07);}
+textarea{min-height:90px;font-family:'JetBrains Mono',monospace;font-size:.76rem;resize:vertical;}
+
+/* BUTTONS */
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px;}
+button{padding:10px 18px;border:none;border-radius:8px;font-family:'Vazirmatn',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;}
+button:hover{transform:translateY(-2px);}
+button:active{transform:translateY(0);}
+button:disabled{opacity:.35;cursor:not-allowed;transform:none!important;}
+.bp{background:linear-gradient(135deg,var(--ac1),var(--ac2));color:#000;font-weight:800;}
+.bp:hover{box-shadow:0 4px 20px rgba(0,255,179,.3);}
+.bd{background:var(--ac3);color:#fff;}
+.bs{background:var(--ac1);color:#000;}
+.bg{background:transparent;color:var(--txt2);border:1px solid var(--bdr);}
+.bg:hover{border-color:var(--ac1);color:var(--ac1);}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:9px;margin-bottom:13px;}
+.sbox{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:13px 10px;text-align:center;position:relative;overflow:hidden;}
+.sbox::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--ac1),var(--ac2));transform:scaleX(0);transition:transform .4s;transform-origin:left;}
+.sbox.lit::after{transform:scaleX(1);}
+.sv{font-size:1.5rem;font-weight:800;color:var(--ac1);font-family:'JetBrains Mono',monospace;line-height:1;margin-bottom:3px;}
+.sv.g{color:var(--ac1);}.sv.r{color:var(--ac3);}.sv.y{color:var(--ac4);}
+.sl{font-size:.68rem;color:var(--txt2);}
+
+/* PROGRESS */
+.prog-wrap{margin:11px 0 5px;}
+.prog-track{width:100%;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.prog-fill{height:100%;width:0%;border-radius:3px;background:linear-gradient(90deg,var(--ac1),var(--ac2));transition:width .15s;box-shadow:0 0 12px rgba(0,255,179,.4);}
+.prog-txt{text-align:center;font-size:.76rem;color:var(--txt2);margin-top:7px;font-family:'JetBrains Mono',monospace;}
+
+/* TABLE */
+.tbl-wrap{max-height:420px;overflow-y:auto;border-radius:10px;border:1px solid var(--bdr);}
+.tbl-wrap::-webkit-scrollbar{width:4px;}
+.tbl-wrap::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+table{width:100%;border-collapse:collapse;font-size:.82rem;}
+th{background:var(--bg3);padding:10px 13px;text-align:right;color:var(--ac2);font-weight:600;font-family:'JetBrains Mono',monospace;font-size:.72rem;position:sticky;top:0;z-index:2;border-bottom:1px solid var(--bdr2);}
+td{padding:8px 13px;border-bottom:1px solid var(--bdr);}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(0,255,179,.02);}
+.ip-mono{font-family:'JetBrains Mono',monospace;font-size:.8rem;}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:700;font-family:'JetBrains Mono',monospace;}
+.b-ok{background:rgba(0,255,179,.1);color:var(--ac1);}
+.b-no{background:rgba(255,62,108,.1);color:var(--ac3);}
+.b-ex{background:rgba(0,128,255,.1);color:var(--ac2);}
+.b-gd{background:rgba(0,255,179,.08);color:var(--ac1);}
+.b-md{background:rgba(255,184,0,.1);color:var(--ac4);}
+.b-sl{background:rgba(155,92,255,.1);color:var(--ac5);}
+.b-cdn{background:rgba(0,128,255,.07);color:#60a5fa;}
+.empty{text-align:center;padding:40px;color:var(--txt2);font-size:.86rem;}
+
+/* COPY SECTION */
+.copy-section{margin-top:14px;display:none;}
+.copy-label{font-size:.75rem;color:var(--txt2);margin-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.copy-box{
+  background:var(--bg3);border:1px solid var(--ac1);border-radius:8px;
+  padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:.75rem;
+  color:var(--ac1);word-break:break-all;line-height:1.6;
+  user-select:all;cursor:text;min-height:44px;
+  position:relative;
+}
+.copy-box:focus{outline:2px solid var(--ac1);}
+.copy-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+
+/* SNI OUTPUT */
+.sni-output{background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:10px 14px;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:#60a5fa;margin-top:6px;user-select:all;cursor:text;}
+
+/* CHART */
+.chart-wrap{position:relative;height:220px;margin-top:8px;}
+
+/* HEALTH BARS */
+.health-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:12px;}
+.hbar-wrap{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px;}
+.hbar-label{display:flex;justify-content:space-between;margin-bottom:7px;font-size:.78rem;}
+.hbar-name{color:var(--txt);font-weight:600;}
+.hbar-pct{font-family:'JetBrains Mono',monospace;font-weight:700;}
+.hbar-track{width:100%;height:6px;background:var(--bg4);border-radius:3px;overflow:hidden;margin-bottom:6px;}
+.hbar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac1),var(--ac2));transition:width .5s;}
+.hbar-sub{font-size:.7rem;color:var(--txt2);display:flex;justify-content:space-between;}
+
+/* HISTORY */
+.hist-item{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.hist-date{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--txt2);}
+.hist-stats{display:flex;gap:12px;align-items:center;font-size:.78rem;}
+
+/* ISP PROFILE */
+.isp-profile{background:var(--bg3);border:1px solid var(--bdr2);border-radius:10px;padding:14px 16px;margin-bottom:14px;}
+.isp-profile h3{color:var(--ac4);font-size:.84rem;margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.ip-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.ip-chip{font-family:'JetBrains Mono',monospace;font-size:.72rem;background:rgba(0,255,179,.08);border:1px solid rgba(0,255,179,.2);color:var(--ac1);padding:3px 9px;border-radius:5px;cursor:pointer;transition:all .15s;}
+.ip-chip:hover{background:rgba(0,255,179,.18);}
+
+/* STABLE IPS */
+.stable-card{display:none;background:var(--bg2);border:1px solid var(--bdr);border-radius:14px;padding:22px 24px;margin-bottom:18px;}
+
+/* NOTES */
+.inote{background:rgba(0,255,179,.04);border-right:3px solid var(--ac1);border-radius:6px;padding:10px 14px;font-size:.79rem;color:var(--txt2);margin-bottom:13px;line-height:1.7;}
+.wnote{background:rgba(255,184,0,.04);border-right:3px solid var(--ac4);border-radius:6px;padding:10px 14px;font-size:.79rem;color:var(--txt2);margin-bottom:13px;line-height:1.7;}
+
+/* GUIDE STEPS */
+.steps{display:flex;flex-direction:column;gap:10px;}
+.step{display:flex;gap:13px;align-items:flex-start;background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:13px 15px;}
+.snum{min-width:26px;height:26px;background:linear-gradient(135deg,var(--ac1),var(--ac2));color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.76rem;flex-shrink:0;font-family:'JetBrains Mono',monospace;}
+.stitle{font-weight:700;font-size:.86rem;margin-bottom:3px;}
+.sdesc{color:var(--txt2);font-size:.78rem;line-height:1.7;}
+.scode{margin-top:7px;background:var(--bg0);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:.74rem;color:var(--ac1);direction:ltr;line-height:1.8;overflow-x:auto;user-select:all;}
+
+/* ABOUT */
+.about-g{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;}
+.abox{background:var(--bg3);border:1px solid var(--bdr);border-radius:10px;padding:16px;}
+.abox h3{color:var(--ac1);margin-bottom:6px;font-size:.88rem;}
+.abox p{color:var(--txt2);font-size:.78rem;line-height:1.75;}
+
+/* QR */
+#qrCode{background:#fff;padding:12px;border-radius:10px;display:inline-block;}
+.qr-wrap{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;margin-top:12px;}
+.qr-info{flex:1;min-width:200px;}
+.qr-info h3{color:var(--ac1);font-size:.9rem;margin-bottom:8px;}
+.qr-info p{color:var(--txt2);font-size:.8rem;line-height:1.7;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(14px);background:var(--bg3);border:1px solid var(--ac1);padding:10px 20px;border-radius:8px;box-shadow:0 4px 28px rgba(0,255,179,.18);opacity:0;transition:all .3s;z-index:9999;font-size:.82rem;white-space:nowrap;font-family:'JetBrains Mono',monospace;pointer-events:none;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+footer{text-align:center;padding:26px 20px;color:var(--txt2);font-size:.76rem;border-top:1px solid var(--bdr);margin-top:12px;}
+footer a{color:var(--ac1);text-decoration:none;}
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:var(--bg1);}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{animation:fadeUp .25s ease both;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="eyebrow">ShirOKhorshid CDN Scanner v2</div>
+  <h1>🌐 CDN IP Scanner</h1>
+  <p>اسکن مستقیم از مرورگر شما · نتایج دقیق بر اساس اینترنت و اپراتور شما · بدون سرور</p>
+</header>
+
+<!-- ISP BAR -->
+<div class="isp-bar">
+  <div class="isp-dot"></div>
+  <span class="isp-lbl">اپراتور:</span>
+  <span class="isp-val" id="ispName">شناسایی...</span>
+  <span class="isp-lbl">|</span>
+  <span class="isp-lbl">آی‌پی:</span>
+  <span class="isp-val" id="userIp">...</span>
+  <span class="isp-lbl">|</span>
+  <span class="isp-lbl">کشور:</span>
+  <span class="isp-val" id="userCountry">...</span>
+  <div class="isp-pill" id="iranWarn">در حال بررسی...</div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on"  onclick="goTab('scanner',this)">🔍 اسکنر</button>
+  <button class="tab"     onclick="goTab('dashboard',this)">📊 داشبورد</button>
+  <button class="tab"     onclick="goTab('history',this)">🕐 تاریخچه</button>
+  <button class="tab"     onclick="goTab('guide',this)">📱 راهنما</button>
+  <button class="tab"     onclick="goTab('about',this)">ℹ️ درباره</button>
+</div>
+
+<!-- ======= SCANNER ======= -->
+<div id="p-scanner" class="panel on">
+
+  <!-- ISP Profile -->
+  <div class="card" id="ispProfileCard" style="display:none">
+    <div class="ctitle"><div class="ctitle-left">🎯 آی‌پی‌های پیشنهادی برای اپراتور شما</div></div>
+    <div class="isp-profile">
+      <h3>⚡ <span id="ispProfileName">اپراتور شما</span> — آی‌پی‌های تأییدشده:</h3>
+      <div class="ip-chips" id="ispRec"></div>
+    </div>
+    <div style="font-size:.74rem;color:var(--txt2)">روی هر آی‌پی کلیک کنید تا به لیست اضافه شود.</div>
+  </div>
+
+  <!-- CDN SELECT -->
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">🏢 انتخاب CDN</div></div>
+    <div class="cdn-grid">
+      <div class="cdn-card on" onclick="toggleCdn(this,'akamai')">
+        <div class="cdn-chk">✓</div>
+        <div class="cdn-emoji">⚡</div>
+        <div class="cdn-name">Akamai</div>
+        <div class="cdn-sub">۳۰٪ اینترنت جهان</div>
+        <span class="pill pg">✅ معمولاً باز</span>
+      </div>
+      <div class="cdn-card" onclick="toggleCdn(this,'google')">
+        <div class="cdn-chk">✓</div>
+        <div class="cdn-emoji">🔵</div>
+        <div class="cdn-name">Google CDN</div>
+        <div class="cdn-sub">googleapis · gstatic</div>
+        <span class="pill pg">✅ معمولاً باز</span>
+      </div>
+      <div class="cdn-card" onclick="toggleCdn(this,'amazon')">
+        <div class="cdn-chk">✓</div>
+        <div class="cdn-emoji">🟠</div>
+        <div class="cdn-name">Amazon CloudFront</div>
+        <div class="cdn-sub">cloudfront.net</div>
+        <span class="pill py">⚠️ گاهی باز</span>
+      </div>
+      <div class="cdn-card" onclick="toggleCdn(this,'azure')">
+        <div class="cdn-chk">✓</div>
+        <div class="cdn-emoji">🔷</div>
+        <div class="cdn-name">Microsoft Azure</div>
+        <div class="cdn-sub">aspnetcdn · msecnd</div>
+        <span class="pill py">⚠️ گاهی باز</span>
+      </div>
+    </div>
+
+    <!-- SNI Selector -->
+    <div style="margin-top:4px">
+      <div style="font-size:.76rem;color:var(--txt2);margin-bottom:7px;font-family:'JetBrains Mono',monospace;">
+        🔒 CDN SNI Hostname — انتخاب کنید:
+      </div>
+      <div class="sni-list" id="sniList"></div>
+      <div style="margin-top:8px">
+        <div style="font-size:.72rem;color:var(--txt2);margin-bottom:4px">SNI انتخاب‌شده:</div>
+        <div class="sni-output" id="sniSelected">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RANGES + PRESETS -->
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">📋 رنج‌های IP</div></div>
+    <div class="inote">💡 پریست سریع انتخاب کنید یا رنج‌های زیر را به دلخواه اضافه کنید.</div>
+    <div class="preset-row">
+      <button class="preset-btn" onclick="applyPreset('quick')">⚡ سریع <span style="font-size:.65rem;opacity:.6">(۵۰)</span></button>
+      <button class="preset-btn" onclick="applyPreset('standard')">🔍 استاندارد <span style="font-size:.65rem;opacity:.6">(۲۵۰)</span></button>
+      <button class="preset-btn" onclick="applyPreset('deep')">🔬 عمیق <span style="font-size:.65rem;opacity:.6">(۱۰۰۰)</span></button>
+      <button class="preset-btn" id="recheckBtn" onclick="applyPreset('recheck')" style="display:none">🔄 بررسی مجدد زنده‌ها</button>
+    </div>
+    <div id="rangeWrap" class="range-wrap"></div>
+    <div class="brow">
+      <button class="bg" onclick="addAllRanges()">➕ همه رنج‌ها</button>
+      <button class="bg" onclick="clearTA()">🗑 پاک کردن</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">⚙️ تنظیمات</div></div>
+    <div class="wnote">🌐 اسکن مستقیم از مرورگر شما — نتایج دقیقاً بر اساس اینترنت شما است. بدون VPN باز کنید.</div>
+    <div class="settings-row">
+      <div class="fg"><label>همزمانی</label><input type="number" id="conc" value="25" min="1" max="80"></div>
+      <div class="fg"><label>تایم‌اوت (ms)</label><input type="number" id="tmo" value="4000" min="1000" max="15000"></div>
+      <div class="fg"><label>حداکثر IP</label><input type="number" id="maxip" value="300" min="10" max="5000"></div>
+      <div class="fg"><label>تکرار هر IP</label><input type="number" id="reps" value="1" min="1" max="3"></div>
+    </div>
+    <div class="fg"><label>لیست IP / CIDR / بازه</label>
+      <textarea id="ipTA" placeholder="مثال:&#10;23.72.0.0/24&#10;2.16.0.1-2.16.0.50&#10;184.24.77.42&#10;# کامنت"></textarea>
+    </div>
+    <div class="brow">
+      <button class="bp" id="btnStart" onclick="startScan()">🚀 شروع اسکن</button>
+      <button class="bd" id="btnStop" onclick="stopScan()" disabled>⏹ توقف</button>
+      <button class="bg" onclick="clearAll()">🗑 پاک</button>
+      <button class="bg" id="btnTxt" onclick="expTxt()" disabled>💾 TXT</button>
+      <button class="bg" id="btnCsv" onclick="expCsv()" disabled>📊 CSV</button>
+      <button class="bs" id="btnQr" onclick="showQR()" disabled>📱 QR</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">📊 وضعیت</div></div>
+    <div class="stats-grid">
+      <div class="sbox"><div class="sv" id="stTotal">0</div><div class="sl">کل</div></div>
+      <div class="sbox"><div class="sv" id="stTested">0</div><div class="sl">تست‌شده</div></div>
+      <div class="sbox"><div class="sv g" id="stAlive">0</div><div class="sl">زنده ✅</div></div>
+      <div class="sbox"><div class="sv r" id="stDead">0</div><div class="sl">بلاک ❌</div></div>
+      <div class="sbox"><div class="sv y" id="stBest">—</div><div class="sl">بهترین ms</div></div>
+      <div class="sbox"><div class="sv" id="stAvg">—</div><div class="sl">میانگین ms</div></div>
+      <div class="sbox"><div class="sv" id="stRate">0%</div><div class="sl">موفقیت</div></div>
+    </div>
+    <div class="prog-wrap">
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+      <div class="prog-txt" id="progTxt">آماده...</div>
+    </div>
+  </div>
+
+  <!-- RESULTS TABLE -->
+  <div class="card">
+    <div class="ctitle">
+      <div class="ctitle-left">📋 نتایج</div>
+      <select id="fmode" onchange="renderTbl()" style="padding:5px 10px;font-size:.74rem;border-radius:6px;width:auto;">
+        <option value="alive">فقط زنده</option>
+        <option value="all">همه</option>
+      </select>
+    </div>
+    <div class="tbl-wrap">
+      <table>
+        <thead>
+          <tr><th>#</th><th>آی‌پی</th><th>CDN</th><th>وضعیت</th><th>تأخیر</th><th>ثبات</th><th>کیفیت</th></tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="7"><div class="empty">🔍 اسکن را شروع کنید.</div></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- COPY SECTION — fixed, selectable text + buttons -->
+    <div class="copy-section" id="copySection">
+      <div class="copy-label">📋 آی‌پی‌های زنده — برای شیروخورشید (کلیک کنید، سپس Ctrl+A و Ctrl+C):</div>
+      <div class="copy-box" id="copyBox" tabindex="0" onclick="selectCopyBox()"></div>
+      <div class="copy-actions">
+        <button class="bs" onclick="tryCopy()">📋 کپی خودکار</button>
+        <button class="bg" onclick="selectCopyBox()">🖱️ انتخاب همه (دستی)</button>
+        <button class="bg" id="btnTxt2" onclick="expTxt()">💾 دانلود TXT</button>
+      </div>
+      <div style="margin-top:12px">
+        <div class="copy-label">🔒 SNI Hostname انتخاب‌شده:</div>
+        <div class="sni-output" id="sniCopyBox" onclick="selectEl('sniCopyBox')"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QR CARD -->
+  <div class="card" id="qrCard" style="display:none">
+    <div class="ctitle"><div class="ctitle-left">📱 QR کد — انتقال سریع به گوشی</div></div>
+    <div class="qr-wrap">
+      <div id="qrCode"></div>
+      <div class="qr-info">
+        <h3>اسکن با گوشی</h3>
+        <p>این QR کد حاوی آی‌پی‌های زنده است. با گوشی اسکن کنید و آی‌پی‌ها را در شیروخورشید paste کنید.</p>
+        <div style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--txt2);word-break:break-all" id="qrText"></div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /scanner -->
+
+<!-- ======= DASHBOARD ======= -->
+<div id="p-dashboard" class="panel">
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">🏥 سلامت CDN‌ها</div></div>
+    <div class="health-grid" id="healthGrid">
+      <div style="color:var(--txt2);font-size:.82rem;padding:20px;text-align:center;grid-column:1/-1">ابتدا یک اسکن اجرا کنید.</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">📈 توزیع تأخیر</div></div>
+    <div class="chart-wrap"><canvas id="latChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">🏆 مقایسه CDN‌ها</div></div>
+    <div class="chart-wrap" style="height:180px"><canvas id="cdnChart"></canvas></div>
+  </div>
+</div>
+
+<!-- ======= HISTORY ======= -->
+<div id="p-history" class="panel">
+  <div class="card">
+    <div class="ctitle">
+      <div class="ctitle-left">🕐 تاریخچه اسکن‌ها</div>
+      <button class="bg" onclick="clearHistory()" style="font-size:.72rem;padding:5px 10px;">🗑 پاک</button>
+    </div>
+    <div class="inote">نتایج هر اسکن به‌صورت خودکار ذخیره می‌شوند تا آی‌پی‌های پایدار را ردیابی کنید.</div>
+    <div id="histList"><div class="empty">هنوز اسکنی انجام نشده.</div></div>
+  </div>
+  <div class="stable-card" id="stableCard">
+    <div class="ctitle"><div class="ctitle-left">⭐ آی‌پی‌های پایدار (در چندین اسکن موفق)</div></div>
+    <div class="inote">این آی‌پی‌ها در بیش از یک اسکن زنده بوده‌اند — احتمالاً پایدارترند.</div>
+    <div class="ip-chips" id="stableIps"></div>
+  </div>
+</div>
+
+<!-- ======= GUIDE ======= -->
+<div id="p-guide" class="panel">
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">📱 راهنمای استفاده در شیروخورشید</div></div>
+    <div class="wnote">⚠️ برای دقیق‌ترین نتایج، بدون VPN و از اتصال اصلی ایران باز کنید.</div>
+    <div class="steps">
+      <div class="step"><div class="snum">1</div><div><div class="stitle">CDN انتخاب کنید</div><div class="sdesc">Akamai را انتخاب کنید (توصیه‌شده). SNI را هم انتخاب کنید.</div></div></div>
+      <div class="step"><div class="snum">2</div><div><div class="stitle">رنج IP اضافه کنید</div><div class="sdesc">از پریست سریع استفاده کنید یا رنج‌ها را به دلخواه انتخاب کنید.</div></div></div>
+      <div class="step"><div class="snum">3</div><div><div class="stitle">اسکن را شروع کنید</div><div class="sdesc">روی "شروع اسکن" بزنید و منتظر بمانید. نتایج به‌صورت زنده نمایش داده می‌شوند.</div></div></div>
+      <div class="step"><div class="snum">4</div><div><div class="stitle">آی‌پی‌ها را کپی کنید</div><div class="sdesc">روی "کپی خودکار" بزنید. اگر کار نکرد، "انتخاب همه" را بزنید و Ctrl+C بگیرید.</div></div></div>
+      <div class="step"><div class="snum">5</div><div><div class="stitle">شیروخورشید → تنظیمات → CDN Fronting</div><div class="sdesc">اپ را باز کنید، به تنظیمات بروید، بخش CDN Fronting را پیدا کنید.</div></div></div>
+      <div class="step"><div class="snum">6</div><div><div class="stitle">CDN edge IPs را paste کنید</div><div class="sdesc">روی "CDN edge IPs" بزنید و آی‌پی‌های کپی‌شده را paste کنید.</div></div></div>
+      <div class="step"><div class="snum">7</div><div><div class="stitle">SNI Hostname را وارد کنید</div><div class="sdesc">SNI انتخاب‌شده را از بخش اسکنر کپی کنید و اینجا وارد کنید:</div>
+        <div class="scode">a248.e.akamai.net&#10;# یا برای Google:&#10;fonts.googleapis.com&#10;# یا برای Azure:&#10;ajax.aspnetcdn.com</div>
+      </div></div>
+      <div class="step"><div class="snum">8</div><div><div class="stitle">CDN Fronting → وصل شوید 🎉</div><div class="sdesc">Connection Protocol را روی CDN Fronting بگذارید و وصل شوید.</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======= ABOUT ======= -->
+<div id="p-about" class="panel">
+  <div class="card">
+    <div class="ctitle"><div class="ctitle-left">🔐 CDN Fronting چطور کار می‌کند؟</div></div>
+    <div class="about-g">
+      <div class="abox"><h3>🚫 بدون CDN Fronting</h3><p>کاربر به سرور سایفون وصل می‌شود → فایروال SNI را می‌بیند → بلاک می‌کند.</p></div>
+      <div class="abox"><h3>✅ با CDN Fronting</h3><p>کاربر به آی‌پی CDN وصل می‌شود → فایروال SNI امن می‌بیند → اجازه می‌دهد → CDN به سایفون فوروارد می‌کند.</p></div>
+      <div class="abox"><h3>🌍 چرا CDN‌ها بلاک نمی‌شوند؟</h3><p>Akamai ۳۰٪ اینترنت جهانی را پشتیبانی می‌کند. بلاک کردنش یعنی قطع بانک‌ها و سایت‌های دولتی ایران.</p></div>
+      <div class="abox"><h3>⚡ این اسکنر چطور کار می‌کند؟</h3><p>مرورگر شما مستقیماً به هر آی‌پی وصل می‌شود. پاسخ سریع = باز. تایم‌اوت = بلاک روی اینترنت شما.</p></div>
+      <div class="abox"><h3>🔄 چرا باید مرتب اجرا شود؟</h3><p>آی‌پی‌های CDN مرتب تغییر می‌کنند. توصیه: هفته‌ای یک بار اسکن تکرار شود.</p></div>
+      <div class="abox"><h3>📡 تفاوت اپراتورها</h3><p>MCI و ایرانسل فیلترینگ متفاوتی دارند. نتایج این اسکنر دقیقاً برای اپراتور فعلی شماست.</p></div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  ساخته‌شده برای <a href="https://github.com/shirokhorshid/shirokhorshid-android" target="_blank">شیروخورشید</a> ·
+  GPL-3.0 · <a href="https://github.com/net4people/bbs" target="_blank">net4people/bbs</a>
+</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- Chart.js loaded inline-compatible way -->
+<script>
+// ================================================================
+// CDN IP Scanner v2 — Serverless, direct browser testing
+// ================================================================
+
+// ---- CDN + SNI DATA ----
+const CDNS = {
+  akamai:{
+    name:'Akamai',
+    snis:[
+      'a248.e.akamai.net',
+      'a77.net.akamai.net',
+      'a104.net.akamai.net',
+      'a184.net.akamai.net',
+      'ds-aksb.akamaized.net',
+      'ak.net.akamaized.net',
+    ],
+    ranges:[
+      {c:'2.16.0.0/24',l:'EU'},{c:'2.17.0.0/24',l:'EU'},{c:'2.18.0.0/24',l:'EU'},
+      {c:'2.19.0.0/24',l:'EU'},{c:'2.20.0.0/24',l:'EU'},{c:'2.21.0.0/24',l:'EU'},
+      {c:'2.22.0.0/24',l:'EU'},{c:'23.32.0.0/24',l:'US'},{c:'23.48.0.0/24',l:'US'},
+      {c:'23.58.0.0/24',l:'US'},{c:'23.72.0.0/24',l:'US'},{c:'23.192.0.0/24',l:'US'},
+      {c:'23.193.0.0/24',l:'US'},{c:'23.202.0.0/24',l:'US'},{c:'23.43.0.0/24',l:'US'},
+      {c:'104.64.0.0/24',l:'Global'},{c:'104.65.0.0/24',l:'Global'},
+      {c:'104.103.0.0/24',l:'Global'},{c:'104.112.0.0/24',l:'Global'},
+      {c:'184.24.0.0/24',l:'Global'},{c:'184.84.0.0/24',l:'Global'},
+      {c:'184.86.0.0/24',l:'Global'},{c:'185.200.232.0/24',l:'EU'},
+      {c:'72.246.0.0/24',l:'US'},{c:'92.16.0.0/24',l:'EU'},{c:'92.122.0.0/24',l:'EU'},
+    ]
+  },
+  google:{
+    name:'Google',
+    snis:[
+      'fonts.googleapis.com',
+      'ajax.googleapis.com',
+      'storage.googleapis.com',
+      'www.gstatic.com',
+      'ssl.gstatic.com',
+      'accounts.google.com',
+    ],
+    ranges:[
+      {c:'34.143.0.0/24',l:'Cloud Run'},{c:'34.160.0.0/24',l:'Cloud'},
+      {c:'34.96.0.0/24',l:'Cloud'},{c:'35.186.0.0/24',l:'Cloud'},
+      {c:'64.233.160.0/24',l:'Core'},{c:'66.249.80.0/24',l:'Core'},
+      {c:'74.125.0.0/24',l:'Core'},{c:'142.250.0.0/24',l:'Core'},
+      {c:'172.217.0.0/24',l:'Core'},{c:'216.58.192.0/24',l:'Core'},
+      {c:'35.201.0.0/24',l:'Cloud'},{c:'34.117.0.0/24',l:'Cloud'},
+    ]
+  },
+  amazon:{
+    name:'CloudFront',
+    snis:[
+      'd1.cloudfront.net',
+      'd2.cloudfront.net',
+      'd3.cloudfront.net',
+      'aws.cloudfront.net',
+      's3.amazonaws.com',
+      'edge.cloudfront.net',
+    ],
+    ranges:[
+      {c:'13.32.0.0/24',l:'US'},{c:'13.35.0.0/24',l:'US'},
+      {c:'52.46.0.0/24',l:'US'},{c:'54.192.0.0/24',l:'Global'},
+      {c:'54.230.0.0/24',l:'Global'},{c:'99.84.0.0/24',l:'Global'},
+      {c:'130.176.0.0/24',l:'Global'},{c:'143.204.0.0/24',l:'Global'},
+      {c:'205.251.192.0/24',l:'Global'},{c:'54.239.128.0/24',l:'Global'},
+    ]
+  },
+  azure:{
+    name:'Azure',
+    snis:[
+      'ajax.aspnetcdn.com',
+      'az416426.vo.msecnd.net',
+      'az784690.vo.msecnd.net',
+      'cdn.office.net',
+      'static.azureedge.net',
+      'az.msecnd.net',
+    ],
+    ranges:[
+      {c:'13.107.4.0/24',l:'Core'},{c:'23.96.0.0/24',l:'US'},
+      {c:'40.64.0.0/24',l:'Global'},{c:'52.224.0.0/24',l:'US'},
+      {c:'104.208.0.0/24',l:'Global'},{c:'137.116.0.0/24',l:'Global'},
+      {c:'168.61.0.0/24',l:'US'},
+    ]
+  }
+};
+
+// ISP pre-tested IPs
+const ISP_PROFILES = {
+  'MCI':   ['184.24.77.42','184.24.77.32','185.200.232.49','23.48.23.151','104.112.146.82','184.24.77.7'],
+  'Irancell': ['2.22.250.149','23.58.193.140','184.24.77.5','185.200.232.50','23.43.237.239','92.16.53.11'],
+  'Rightel':  ['184.24.77.21','185.200.232.42','23.48.23.186','72.246.28.3','92.122.0.1'],
+  'Shatel':   ['184.24.77.11','185.200.232.41','23.48.23.133','2.19.126.81','104.64.0.5'],
+  'default':  ['184.24.77.42','23.48.23.151','185.200.232.49','104.112.146.82','23.58.193.140'],
+};
+
+// ---- STATE ----
+let sel = new Set(['akamai']);
+let selSNI = '';
+let state = {run:false,stop:false,res:[],total:0,tested:0,alive:0,dead:0};
+let latChart = null, cdnChart = null;
+
+// ---- INIT ----
+detectISP();
+renderRanges();
+renderSNIs();
+
+// ---- ISP DETECTION ----
+async function detectISP(){
+  try{
+    const r = await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(6000)});
+    const d = await r.json();
+    document.getElementById('ispName').textContent = d.org||d.asn||'نامشخص';
+    document.getElementById('userIp').textContent   = d.ip||'?';
+    document.getElementById('userCountry').textContent = d.country_name||'?';
+    const pill = document.getElementById('iranWarn');
+    if(d.country_code==='IR'){
+      pill.textContent='🇮🇷 ایران — نتایج دقیق!';
+      pill.style.color='var(--ac1)';
+    } else {
+      pill.textContent='⚠️ خارج از ایران';
+      pill.style.color='var(--ac4)';
+    }
+    showISPProfile(d.org||'');
+  } catch(e){
+    document.getElementById('ispName').textContent='نامشخص';
+    document.getElementById('iranWarn').textContent='❓ نامشخص';
+  }
+}
+
+function showISPProfile(org){
+  let key='default';
+  for(const k of Object.keys(ISP_PROFILES)){
+    if(org.toLowerCase().includes(k.toLowerCase())){key=k;break;}
+  }
+  document.getElementById('ispProfileName').textContent = key==='default'?'اپراتور شما':key;
+  document.getElementById('ispRec').innerHTML = ISP_PROFILES[key].map(ip=>
+    `<span class="ip-chip" onclick="addIP('${ip}')" title="افزودن به لیست">${ip}</span>`
+  ).join('');
+  document.getElementById('ispProfileCard').style.display='block';
+}
+
+function addIP(ip){
+  const ta=document.getElementById('ipTA');
+  const lines=ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.includes(ip)){
+    ta.value=(ta.value?ta.value.trimEnd()+'\n':'')+ip;
+    toast('✅ '+ip+' اضافه شد');
+  }
+}
+
+// ---- SNI RENDERING ----
+function renderSNIs(){
+  const list = document.getElementById('sniList');
+  list.innerHTML = '';
+  sel.forEach(cdn=>{
+    if(!CDNS[cdn])return;
+    CDNS[cdn].snis.forEach(sni=>{
+      const el = document.createElement('span');
+      el.className = 'sni-chip';
+      el.textContent = sni;
+      if(sni===selSNI) el.classList.add('sel');
+      el.onclick = ()=>{
+        selSNI = sni;
+        document.querySelectorAll('.sni-chip').forEach(c=>c.classList.remove('sel'));
+        el.classList.add('sel');
+        document.getElementById('sniSelected').textContent = sni;
+        document.getElementById('sniCopyBox').textContent = sni;
+      };
+      list.appendChild(el);
+    });
+  });
+  // Auto-select first SNI if none selected or selected not in current list
+  const allSnis=[...list.querySelectorAll('.sni-chip')].map(c=>c.textContent);
+  if(!selSNI||!allSnis.includes(selSNI)){
+    const first=list.querySelector('.sni-chip');
+    if(first){first.click();}
+  }
+}
+
+// ---- TABS ----
+function goTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('p-'+name).classList.add('on');
+  if(name==='dashboard') buildDashboard();
+  if(name==='history')   renderHistory();
+}
+
+// ---- CDN TOGGLE ----
+function toggleCdn(el,cdn){
+  if(sel.has(cdn)){
+    if(sel.size===1){toast('⚠️ حداقل یک CDN باید انتخاب باشد');return;}
+    sel.delete(cdn);el.classList.remove('on');
+  } else {
+    sel.add(cdn);el.classList.add('on');
+  }
+  renderRanges();
+  renderSNIs();
+}
+
+// ---- RANGES ----
+function renderRanges(){
+  const wrap=document.getElementById('rangeWrap');
+  wrap.innerHTML='';
+  sel.forEach(cdn=>{
+    if(!CDNS[cdn])return;
+    CDNS[cdn].ranges.forEach(r=>{
+      const c=document.createElement('div');
+      c.className='rchip';
+      c.innerHTML=`${r.c} <span class="rchip-tag">${CDNS[cdn].name} ${r.l}</span>`;
+      c.onclick=()=>toggleRange(c,r.c);
+      wrap.appendChild(c);
+    });
+  });
+}
+
+function toggleRange(chip,cidr){
+  const ta=document.getElementById('ipTA');
+  const lines=ta.value.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(lines.includes(cidr)){
+    ta.value=lines.filter(l=>l!==cidr).join('\n');
+    chip.classList.remove('on');
+  } else {
+    ta.value=(ta.value?ta.value.trimEnd()+'\n':'')+cidr;
+    chip.classList.add('on');
+    toast('✅ '+cidr+' اضافه شد');
+  }
+}
+
+function addAllRanges(){
+  const ta=document.getElementById('ipTA');
+  const lines=new Set(ta.value.split('\n').map(l=>l.trim()).filter(Boolean));
+  sel.forEach(cdn=>{if(CDNS[cdn])CDNS[cdn].ranges.forEach(r=>lines.add(r.c));});
+  ta.value=[...lines].join('\n');
+  document.querySelectorAll('.rchip').forEach(c=>c.classList.add('on'));
+  toast('✅ همه رنج‌ها اضافه شدند');
+}
+
+function clearTA(){
+  document.getElementById('ipTA').value='';
+  document.querySelectorAll('.rchip').forEach(c=>c.classList.remove('on'));
+  toast('🗑 لیست پاک شد');
+}
+
+// ---- PRESETS ----
+function applyPreset(type){
+  const ta=document.getElementById('ipTA');
+  const conc=document.getElementById('conc');
+  const tmo=document.getElementById('tmo');
+  const maxip=document.getElementById('maxip');
+  ta.value='';
+  if(type==='quick'){
+    conc.value=30;tmo.value=3000;maxip.value=50;
+    sel.forEach(cdn=>{if(CDNS[cdn]?.ranges[0])ta.value+=(ta.value?'\n':'')+CDNS[cdn].ranges[0].c;});
+    toast('⚡ پریست سریع — ۵۰ IP');
+  } else if(type==='standard'){
+    conc.value=25;tmo.value=4000;maxip.value=250;
+    sel.forEach(cdn=>{if(CDNS[cdn])CDNS[cdn].ranges.slice(0,5).forEach(r=>ta.value+=(ta.value?'\n':'')+r.c);});
+    toast('🔍 پریست استاندارد — ۲۵۰ IP');
+  } else if(type==='deep'){
+    conc.value=20;tmo.value=5000;maxip.value=1000;
+    sel.forEach(cdn=>{if(CDNS[cdn])CDNS[cdn].ranges.forEach(r=>ta.value+=(ta.value?'\n':'')+r.c);});
+    toast('🔬 پریست عمیق — ۱۰۰۰ IP');
+  } else if(type==='recheck'){
+    const prev=state.res.filter(r=>r.alive).map(r=>r.ip);
+    if(!prev.length){toast('❌ هیچ IP زنده‌ای وجود ندارد');return;}
+    ta.value=prev.join('\n');
+    document.getElementById('reps').value=3;
+    maxip.value=prev.length;
+    toast('🔄 بررسی مجدد '+prev.length+' IP زنده');
+  }
+}
+
+// ---- IP UTILS ----
+function ip2int(ip){
+  const p=ip.split('.').map(Number);
+  if(p.length!==4||p.some(x=>isNaN(x)||x<0||x>255))return null;
+  return((p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3])>>>0;
+}
+function int2ip(n){return[(n>>>24)&255,(n>>>16)&255,(n>>>8)&255,n&255].join('.');}
+
+function cidr2ips(cidr){
+  const[ip,b]=cidr.split('/');const bits=parseInt(b,10);
+  if(isNaN(bits)||bits<16||bits>32)return[];
+  const base=ip2int(ip);if(base===null)return[];
+  const count=Math.pow(2,32-bits);
+  const net=base&(~((1<<(32-bits))-1)>>>0);
+  const ips=[];for(let i=0;i<count;i++)ips.push(int2ip((net+i)>>>0));
+  return ips;
+}
+
+function range2ips(r){
+  const[s,e]=r.split('-').map(x=>x.trim());
+  const si=ip2int(s),ei=ip2int(e);
+  if(si===null||ei===null||ei<si)return[];
+  const ips=[];for(let i=si;i<=ei;i++)ips.push(int2ip(i));
+  return ips;
+}
+
+function parseIPs(text){
+  const lines=text.split('\n').map(l=>l.trim()).filter(l=>l&&!l.startsWith('#'));
+  const all=new Set();
+  for(const line of lines){
+    if(line.includes('/'))cidr2ips(line).forEach(ip=>all.add(ip));
+    else if(line.includes('-'))range2ips(line).forEach(ip=>all.add(ip));
+    else if(ip2int(line)!==null)all.add(line);
+  }
+  return[...all];
+}
+
+function whichCdn(ip){
+  const n=ip2int(ip);if(n===null)return'?';
+  for(const[key,data]of Object.entries(CDNS)){
+    for(const r of data.ranges){
+      const[base,b]=r.c.split('/');const bits=parseInt(b);
+      const mask=(~((1<<(32-bits))-1))>>>0;
+      if((n&mask)===(ip2int(base)&mask))return data.name;
+    }
+  }
+  return'?';
+}
+
+// ---- TEST IP — direct from user's browser ----
+function singleTest(ip,tms){
+  return new Promise(resolve=>{
+    const start=performance.now();
+    let done=false;
+    const fin=(ok)=>{
+      if(done)return;done=true;clearTimeout(timer);
+      const ms=performance.now()-start;
+      resolve(ok?ms:null);
+    };
+    const timer=setTimeout(()=>fin(false),tms);
+    fetch(`https://${ip}/`,{method:'HEAD',mode:'no-cors',cache:'no-store'})
+      .then(()=>fin(true))
+      .catch(()=>{
+        const ms=performance.now()-start;
+        fin(ms<tms*0.85);
+      });
+  });
+}
+
+async function testIP(ip,tms,reps){
+  const lats=[];
+  for(let i=0;i<reps;i++){
+    const l=await singleTest(ip,tms);
+    if(l===null)return{ip,alive:false,latency:null,stability:0,cdn:whichCdn(ip)};
+    lats.push(l);
+  }
+  const avg=Math.round(lats.reduce((a,b)=>a+b,0)/lats.length);
+  const variance=lats.length>1
+    ?Math.round(Math.sqrt(lats.map(l=>(l-avg)**2).reduce((a,b)=>a+b,0)/lats.length))
+    :0;
+  const stability=lats.length>1?Math.max(0,100-Math.round(variance/avg*100)):100;
+  return{ip,alive:true,latency:avg,stability,cdn:whichCdn(ip)};
+}
+
+async function pool(items,worker,concurrency,onDone){
+  let idx=0;
+  const workers=Array.from({length:concurrency},async()=>{
+    while(idx<items.length&&!state.stop){
+      const i=idx++;
+      onDone(await worker(items[i]));
+    }
+  });
+  await Promise.all(workers);
+}
+
+// ---- SCAN ----
+async function startScan(){
+  const input=document.getElementById('ipTA').value;
+  const conc=Math.max(1,Math.min(80,+document.getElementById('conc').value||25));
+  const tmo=Math.max(1000,+document.getElementById('tmo').value||4000);
+  const maxip=Math.max(10,+document.getElementById('maxip').value||300);
+  const reps=Math.max(1,Math.min(3,+document.getElementById('reps').value||1));
+
+  let ips=parseIPs(input);
+  if(!ips.length){toast('❌ هیچ IP معتبری وارد نشده!');return;}
+  if(ips.length>maxip){
+    ips=ips.sort(()=>Math.random()-.5).slice(0,maxip);
+    toast(`⚠️ ${maxip} IP تصادفی انتخاب شد`);
+  }
+
+  state={run:true,stop:false,res:[],total:ips.length,tested:0,alive:0,dead:0};
+  setUI(false);
+  document.getElementById('copySection').style.display='none';
+  document.getElementById('qrCard').style.display='none';
+  updateStats();renderTbl();
+
+  await pool(ips,ip=>testIP(ip,tmo,reps),conc,r=>{
+    state.res.push(r);state.tested++;
+    if(r.alive)state.alive++;else state.dead++;
+    updateStats();
+    if(state.tested%5===0||state.tested===state.total)renderTbl();
+  });
+
+  state.run=false;renderTbl();updateStats();setUI(true);
+
+  const has=state.alive>0;
+  ['btnTxt','btnQr'].forEach(id=>document.getElementById(id).disabled=!has);
+  document.getElementById('recheckBtn').style.display=has?'flex':'none';
+
+  if(has){
+    const sorted=state.res.filter(r=>r.alive).sort((a,b)=>a.latency-b.latency);
+    const csv=sorted.map(r=>r.ip).join(',');
+    document.getElementById('copyBox').textContent=csv;
+    document.getElementById('sniCopyBox').textContent=selSNI||'—';
+    document.getElementById('copySection').style.display='block';
+    saveHistory();
+  }
+  toast(state.stop?'⏹ متوقف شد':`✅ ${state.alive} IP زنده از ${state.total}`);
+}
+
+function stopScan(){state.stop=true;toast('در حال توقف...');}
+
+function clearAll(){
+  state={run:false,stop:false,res:[],total:0,tested:0,alive:0,dead:0};
+  document.getElementById('btnTxt').disabled=true;
+  document.getElementById('btnQr').disabled=true;
+  document.getElementById('copySection').style.display='none';
+  document.getElementById('qrCard').style.display='none';
+  document.getElementById('recheckBtn').style.display='none';
+  document.getElementById('stBest').textContent='—';
+  document.getElementById('stAvg').textContent='—';
+  document.getElementById('stRate').textContent='0%';
+  updateStats();renderTbl();toast('🗑 پاک شد');
+}
+
+function setUI(done){
+  document.getElementById('btnStart').disabled=!done;
+  document.getElementById('btnStop').disabled=done;
+}
+
+// ---- STATS ----
+function updateStats(){
+  document.getElementById('stTotal').textContent=state.total;
+  document.getElementById('stTested').textContent=state.tested;
+  document.getElementById('stAlive').textContent=state.alive;
+  document.getElementById('stDead').textContent=state.dead;
+  const alives=state.res.filter(r=>r.alive);
+  if(alives.length){
+    document.getElementById('stBest').textContent=Math.min(...alives.map(r=>r.latency));
+    document.getElementById('stAvg').textContent=Math.round(alives.reduce((s,r)=>s+r.latency,0)/alives.length);
+  }
+  const rate=state.tested?Math.round(state.alive/state.tested*100):0;
+  document.getElementById('stRate').textContent=rate+'%';
+  const pct=state.total?(state.tested/state.total)*100:0;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progTxt').textContent=state.run
+    ?`اسکن... ${state.tested}/${state.total} (${pct.toFixed(1)}%)`
+    :(state.tested?`کامل — ${state.alive} زنده از ${state.total}`:'آماده...');
+}
+
+// ---- TABLE ----
+function renderTbl(){
+  const tbody=document.getElementById('tbody');
+  const fm=document.getElementById('fmode').value;
+  let res=[...state.res];
+  if(fm==='alive')res=res.filter(r=>r.alive);
+  res.sort((a,b)=>{
+    if(a.alive&&!b.alive)return -1;
+    if(!a.alive&&b.alive)return 1;
+    return a.latency-b.latency;
+  });
+  if(!res.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty">🔍 نتیجه‌ای نیست.</div></td></tr>';return;}
+  let i=0;
+  tbody.innerHTML=res.map(r=>{
+    i++;
+    const st=r.alive?'<span class="badge b-ok">زنده ✅</span>':'<span class="badge b-no">بلاک ❌</span>';
+    const q=r.alive?(r.latency<150?'<span class="badge b-ex">عالی</span>':r.latency<400?'<span class="badge b-gd">خوب</span>':r.latency<900?'<span class="badge b-md">متوسط</span>':'<span class="badge b-sl">کند</span>'):'—';
+    const cdn=r.cdn!=='?'?`<span class="badge b-cdn">${r.cdn}</span>`:'—';
+    const stab=r.alive?(r.stability>=90?'🟢':r.stability>=70?'🟡':'🔴')+' '+r.stability+'%':'—';
+    return`<tr>
+      <td style="color:var(--txt2);font-family:'JetBrains Mono',monospace">${i}</td>
+      <td class="ip-mono">${r.ip}</td>
+      <td>${cdn}</td><td>${st}</td>
+      <td style="font-family:'JetBrains Mono',monospace">${r.alive?r.latency+' ms':'—'}</td>
+      <td style="font-size:.76rem">${stab}</td>
+      <td>${q}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ---- COPY — FIXED ----
+// Works in all browsers: tries clipboard API first, falls back to selection
+function tryCopy(){
+  const text=document.getElementById('copyBox').textContent;
+  if(!text||text===''){toast('❌ هیچ آی‌پی‌ای وجود ندارد');return;}
+
+  // Method 1: Clipboard API (modern browsers, HTTPS)
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text)
+      .then(()=>toast('📋 کپی شد! ✅'))
+      .catch(()=>fallbackCopy(text));
+    return;
+  }
+  // Method 2: fallback
+  fallbackCopy(text);
+}
+
+function fallbackCopy(text){
+  // Create temp textarea, select, copy
+  const ta=document.createElement('textarea');
+  ta.value=text;
+  ta.style.cssText='position:fixed;left:-9999px;top:-9999px;opacity:0;';
+  document.body.appendChild(ta);
+  ta.focus();ta.select();
+  try{
+    const ok=document.execCommand('copy');
+    toast(ok?'📋 کپی شد! ✅':'⚠️ از "انتخاب همه" استفاده کنید');
+  } catch(e){
+    toast('⚠️ روی متن کلیک کنید و Ctrl+A، Ctrl+C بگیرید');
+  }
+  document.body.removeChild(ta);
+}
+
+function selectCopyBox(){
+  const el=document.getElementById('copyBox');
+  const range=document.createRange();
+  range.selectNodeContents(el);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  toast('✅ متن انتخاب شد — Ctrl+C برای کپی');
+}
+
+function selectEl(id){
+  const el=document.getElementById(id);
+  const range=document.createRange();
+  range.selectNodeContents(el);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+}
+
+// ---- EXPORT ----
+function dl(name,content,type='text/plain'){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=name;a.click();
+  URL.revokeObjectURL(url);
+}
+
+function expTxt(){
+  const s=state.res.filter(r=>r.alive).sort((a,b)=>a.latency-b.latency);
+  if(!s.length){toast('❌ هیچ IP زنده‌ای وجود ندارد');return;}
+  dl('cdn_clean_ips.txt',s.map(r=>r.ip).join('\n'));
+  toast('💾 TXT ذخیره شد');
+}
+
+function expCsv(){
+  const s=state.res.filter(r=>r.alive).sort((a,b)=>a.latency-b.latency);
+  if(!s.length){toast('❌ هیچ IP زنده‌ای وجود ندارد');return;}
+  const rows=[['IP','CDN','Latency_ms','Stability_pct'],
+    ...s.map(r=>[r.ip,r.cdn,r.latency,r.stability||100])];
+  dl('cdn_clean_ips.csv',rows.map(r=>r.join(',')).join('\n'),'text/csv');
+  toast('📊 CSV ذخیره شد');
+}
+
+// ---- QR CODE ----
+function showQR(){
+  const sorted=state.res.filter(r=>r.alive).sort((a,b)=>a.latency-b.latency).slice(0,15);
+  if(!sorted.length){toast('❌ هیچ IP زنده‌ای وجود ندارد');return;}
+  const ips=sorted.map(r=>r.ip).join(',');
+  const qrDiv=document.getElementById('qrCode');
+  qrDiv.innerHTML='';
+
+  // Inline QR code generator (no external lib needed)
+  // Use a free QR API as fallback since qrcodejs may not load
+  const img=document.createElement('img');
+  img.src=`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(ips)}`;
+  img.alt='QR Code';
+  img.width=160;img.height=160;
+  img.style.borderRadius='6px';
+  qrDiv.appendChild(img);
+
+  document.getElementById('qrText').textContent=ips;
+  document.getElementById('qrCard').style.display='block';
+  document.getElementById('qrCard').scrollIntoView({behavior:'smooth',block:'nearest'});
+  toast('📱 QR کد آماده شد');
+}
+
+// ---- DASHBOARD ----
+function buildDashboard(){
+  if(!state.res.length){return;}
+  const alives=state.res.filter(r=>r.alive);
+
+  // CDN health bars
+  const hg=document.getElementById('healthGrid');
+  const groups={};
+  state.res.forEach(r=>{
+    const c=r.cdn||'?';
+    if(!groups[c])groups[c]={total:0,alive:0,lats:[]};
+    groups[c].total++;
+    if(r.alive){groups[c].alive++;groups[c].lats.push(r.latency);}
+  });
+
+  if(!Object.keys(groups).length){return;}
+  hg.innerHTML=Object.entries(groups).map(([name,d])=>{
+    const pct=Math.round(d.alive/d.total*100);
+    const avgLat=d.lats.length?Math.round(d.lats.reduce((a,b)=>a+b,0)/d.lats.length):0;
+    const col=pct>=70?'var(--ac1)':pct>=40?'var(--ac4)':'var(--ac3)';
+    return`<div class="hbar-wrap">
+      <div class="hbar-label"><span class="hbar-name">${name}</span><span class="hbar-pct" style="color:${col}">${pct}%</span></div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${pct}%;background:${col}"></div></div>
+      <div class="hbar-sub"><span>${d.alive}/${d.total} زنده</span><span>${avgLat?avgLat+'ms avg':'—'}</span></div>
+    </div>`;
+  }).join('');
+
+  // Load Chart.js dynamically only when needed
+  if(typeof Chart==='undefined'){
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js';
+    s.onload=()=>drawCharts(alives,groups);
+    document.head.appendChild(s);
+  } else {
+    drawCharts(alives,groups);
+  }
+}
+
+function drawCharts(alives,groups){
+  // Latency chart
+  const bins=[0,100,200,300,500,700,1000,9999];
+  const labels=['<100ms','100-200','200-300','300-500','500-700','700-1000','1000+'];
+  const counts=new Array(7).fill(0);
+  alives.forEach(r=>{for(let i=0;i<bins.length-1;i++){if(r.latency>=bins[i]&&r.latency<bins[i+1]){counts[i]++;break;}}});
+  if(latChart)latChart.destroy();
+  latChart=new Chart(document.getElementById('latChart'),{
+    type:'bar',
+    data:{labels,datasets:[{label:'تعداد IP',data:counts,backgroundColor:'rgba(0,255,179,.25)',borderColor:'rgba(0,255,179,.8)',borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#6b82a0',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#6b82a0',font:{size:10}},grid:{color:'rgba(255,255,255,.04)'}}}}
+  });
+
+  // CDN comparison
+  const cdnNames=Object.keys(groups);
+  if(cdnChart)cdnChart.destroy();
+  cdnChart=new Chart(document.getElementById('cdnChart'),{
+    type:'bar',
+    data:{labels:cdnNames,datasets:[
+      {label:'زنده',data:cdnNames.map(n=>groups[n].alive),backgroundColor:'rgba(0,255,179,.3)',borderColor:'rgba(0,255,179,.8)',borderWidth:2,borderRadius:4},
+      {label:'بلاک',data:cdnNames.map(n=>groups[n].total-groups[n].alive),backgroundColor:'rgba(255,62,108,.2)',borderColor:'rgba(255,62,108,.6)',borderWidth:2,borderRadius:4},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#c8d8ea',font:{size:11}}}},scales:{x:{ticks:{color:'#6b82a0'},grid:{color:'rgba(255,255,255,.04)'}},y:{ticks:{color:'#6b82a0'},grid:{color:'rgba(255,255,255,.04)'}}}}
+  });
+}
+
+// ---- HISTORY ----
+function saveHistory(){
+  const alives=state.res.filter(r=>r.alive).sort((a,b)=>a.latency-b.latency);
+  if(!alives.length)return;
+  const entry={
+    ts:Date.now(),
+    isp:document.getElementById('ispName').textContent,
+    country:document.getElementById('userCountry').textContent,
+    total:state.total,alive:alives.length,
+    avgLat:Math.round(alives.reduce((s,r)=>s+r.latency,0)/alives.length),
+    ips:alives.slice(0,30).map(r=>r.ip),
+  };
+  const hist=JSON.parse(localStorage.getItem('cdnHistory')||'[]');
+  hist.unshift(entry);
+  if(hist.length>20)hist.pop();
+  localStorage.setItem('cdnHistory',JSON.stringify(hist));
+}
+
+function renderHistory(){
+  const hist=JSON.parse(localStorage.getItem('cdnHistory')||'[]');
+  const el=document.getElementById('histList');
+  if(!hist.length){el.innerHTML='<div class="empty">هنوز اسکنی انجام نشده.</div>';
+    document.getElementById('stableCard').style.display='none';return;}
+  el.innerHTML=hist.map((h,i)=>{
+    const d=new Date(h.ts);
+    const ds=d.toLocaleDateString('fa-IR')+' '+d.toLocaleTimeString('fa-IR');
+    const rate=Math.round(h.alive/h.total*100);
+    return`<div class="hist-item">
+      <div>
+        <div class="hist-date">${ds}</div>
+        <div style="font-size:.72rem;color:var(--txt2);font-family:'JetBrains Mono',monospace;margin-top:3px">${h.ips.slice(0,4).join(', ')}${h.ips.length>4?'...':''}</div>
+      </div>
+      <div class="hist-stats">
+        <span style="color:var(--ac1);font-weight:700">${h.alive} زنده</span>
+        <span style="color:var(--txt2)">${h.total} کل</span>
+        <span style="color:var(--ac4)">${rate}%</span>
+        <span style="color:var(--txt2)">${h.avgLat}ms</span>
+        <span class="badge b-cdn">${h.isp.split(' ')[0]}</span>
+      </div>
+      <button class="bg" onclick="loadHist(${i})" style="font-size:.72rem;padding:5px 10px">📋 بارگذاری</button>
+    </div>`;
+  }).join('');
+
+  // Stable IPs
+  const freq={};
+  hist.forEach(h=>h.ips.forEach(ip=>freq[ip]=(freq[ip]||0)+1));
+  const stable=Object.entries(freq).filter(([ip,c])=>c>=2).sort((a,b)=>b[1]-a[1]).slice(0,20);
+  const sc=document.getElementById('stableCard');
+  if(stable.length){
+    sc.style.display='block';
+    document.getElementById('stableIps').innerHTML=stable.map(([ip,c])=>
+      `<span class="ip-chip" onclick="addIP('${ip}')" title="${c} بار موفق">${ip} <span style="font-size:.6rem;opacity:.6">(${c}×)</span></span>`
+    ).join('');
+  } else {
+    sc.style.display='none';
+  }
+}
+
+function loadHist(i){
+  const hist=JSON.parse(localStorage.getItem('cdnHistory')||'[]');
+  if(!hist[i])return;
+  document.getElementById('ipTA').value=hist[i].ips.join('\n');
+  goTab('scanner',document.querySelectorAll('.tab')[0]);
+  toast('✅ آی‌پی‌های تاریخچه بارگذاری شدند');
+}
+
+function clearHistory(){
+  localStorage.removeItem('cdnHistory');
+  renderHistory();
+  toast('🗑 تاریخچه پاک شد');
+}
+
+// ---- TOAST ----
+function toast(msg,dur=2800){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),dur);
+}
+</script>
+</body>
+</html>
