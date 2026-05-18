@@ -582,12 +582,91 @@ const CDNS = {
 
 // ISP pre-tested IPs
 const ISP_PROFILES = {
-  'MCI':   ['184.24.77.42','184.24.77.32','185.200.232.49','23.48.23.151','104.112.146.82','184.24.77.7'],
+  'MCI':      ['184.24.77.42','184.24.77.32','185.200.232.49','23.48.23.151','104.112.146.82','184.24.77.7'],
   'Irancell': ['2.22.250.149','23.58.193.140','184.24.77.5','185.200.232.50','23.43.237.239','92.16.53.11'],
   'Rightel':  ['184.24.77.21','185.200.232.42','23.48.23.186','72.246.28.3','92.122.0.1'],
   'Shatel':   ['184.24.77.11','185.200.232.41','23.48.23.133','2.19.126.81','104.64.0.5'],
+  'Asiatech': ['184.24.77.16','185.200.232.43','23.48.23.195','104.64.0.6'],
+  'Pars':     ['184.24.77.36','185.200.232.8','23.48.23.178','104.64.0.7'],
   'default':  ['184.24.77.42','23.48.23.151','185.200.232.49','104.112.146.82','23.58.193.140'],
 };
+
+// Real ASN + keyword mapping for Iranian ISPs
+const ISP_RULES = [
+  { key:'MCI',      asns:['AS197207','AS43754','AS48159','AS58224','AS12880'], keywords:['mobile communication company of iran','mci','hamrahe aval','همراه اول','mokhaberat','telecommunication infrastructure'] },
+  { key:'Irancell', asns:['AS44244','AS57218'],  keywords:['iran cell','irancell','mtn','ایرانسل'] },
+  { key:'Rightel',  asns:['AS57463','AS49100'],  keywords:['rightel','رایتل'] },
+  { key:'Shatel',   asns:['AS31549','AS34918'],  keywords:['shatel','شاتل'] },
+  { key:'Asiatech', asns:['AS25184'],            keywords:['asiatech','آسیاتک'] },
+  { key:'Pars',     asns:['AS16322'],            keywords:['pars online','پارس آنلاین','parsian'] },
+];
+
+// Local IP range database — no API needed
+// Covers Iran + neighboring countries
+// Format: [startIP_as_int, endIP_as_int, ISP_name, country_code]
+const IP_DB = (()=>{
+  const r = (a,b,n,c)=>([ip2intS(a), ip2intS(b), n, c]);
+  function ip2intS(ip){
+    const p=ip.split('.').map(Number);
+    return((p[0]<<24)|(p[1]<<16)|(p[2]<<8)|p[3])>>>0;
+  }
+  return [
+    // ===== IRAN — MCI همراه اول =====
+    r('5.22.0.0',    '5.22.127.255',   'MCI',      'IR'),
+    r('5.53.32.0',   '5.53.63.255',    'MCI',      'IR'),
+    r('78.38.0.0',   '78.39.255.255',  'MCI',      'IR'),
+    r('91.92.0.0',   '91.93.255.255',  'MCI',      'IR'),
+    r('94.182.0.0',  '94.183.255.255', 'MCI',      'IR'),
+    r('178.131.0.0', '178.131.255.255','MCI',      'IR'),
+    r('188.136.0.0', '188.137.255.255','MCI',      'IR'),
+    r('213.176.0.0', '213.177.255.255','MCI',      'IR'),
+    // ===== IRAN — Irancell ایرانسل =====
+    r('91.98.0.0',   '91.99.255.255',  'Irancell', 'IR'),
+    r('94.74.128.0', '94.74.191.255',  'Irancell', 'IR'),
+    r('109.122.192.0','109.122.255.255','Irancell', 'IR'),
+    r('37.254.0.0',  '37.255.255.255', 'Irancell', 'IR'),
+    r('185.55.224.0','185.55.227.255', 'Irancell', 'IR'),
+    // ===== IRAN — Rightel رایتل =====
+    r('5.160.0.0',   '5.160.255.255',  'Rightel',  'IR'),
+    r('37.32.0.0',   '37.32.255.255',  'Rightel',  'IR'),
+    r('5.62.160.0',  '5.62.191.255',   'Rightel',  'IR'),
+    // ===== IRAN — Shatel شاتل =====
+    r('2.144.0.0',   '2.147.255.255',  'Shatel',   'IR'),
+    r('77.36.192.0', '77.36.255.255',  'Shatel',   'IR'),
+    r('85.185.0.0',  '85.185.255.255', 'Shatel',   'IR'),
+    r('195.146.32.0','195.146.47.255', 'Shatel',   'IR'),
+    // ===== IRAN — Asiatech آسیاتک =====
+    r('37.156.0.0',  '37.157.255.255', 'Asiatech', 'IR'),
+    r('91.108.4.0',  '91.108.7.255',   'Asiatech', 'IR'),
+    r('185.208.76.0','185.208.79.255', 'Asiatech', 'IR'),
+    // ===== IRAN — Pars Online پارس آنلاین =====
+    r('82.99.192.0', '82.99.255.255',  'Pars',     'IR'),
+    r('93.110.0.0',  '93.111.255.255', 'Pars',     'IR'),
+    // ===== IRAN — TCI/Telecommunication =====
+    r('5.200.0.0',   '5.201.255.255',  'TCI',      'IR'),
+    r('85.15.0.0',   '85.15.255.255',  'TCI',      'IR'),
+    r('217.218.0.0', '217.219.255.255','TCI',      'IR'),
+    // ===== ARMENIA =====
+    r('46.70.0.0',   '46.70.255.255',  'Ucom',     'AM'),
+    r('37.252.0.0',  '37.252.255.255', 'Ucom',     'AM'),
+    r('46.235.0.0',  '46.235.255.255', 'VivaCell', 'AM'),
+    r('91.194.96.0', '91.194.99.255',  'Rostelecom','AM'),
+    r('109.200.96.0','109.200.127.255','Beeline',  'AM'),
+    r('176.74.0.0',  '176.75.255.255', 'GNC',      'AM'),
+    r('188.127.128.0','188.127.255.255','Telecom',  'AM'),
+    r('213.45.0.0',  '213.45.63.255',  'ArmenTel', 'AM'),
+  ];
+})();
+
+// Look up IP in local database
+function lookupIP(ip){
+  const n = ip2int(ip);
+  if(n===null) return null;
+  for(const [start,end,isp,country] of IP_DB){
+    if(n>=start && n<=end) return {isp, country};
+  }
+  return null;
+}
 
 // ---- STATE ----
 let sel = new Set(['akamai']);
@@ -601,38 +680,171 @@ renderRanges();
 renderSNIs();
 
 // ---- ISP DETECTION ----
+// Strategy:
+// 1. WebRTC — gets real local IP from browser (no API needed, instant)
+// 2. Multiple APIs in parallel — fastest one wins
+// Both run simultaneously, best result shown
+
+const ISP_APIS = [
+  { url:'https://ipapi.co/json/', parse: d=>({ ip:d.ip, org:d.org||'', asn:d.asn||'', country:d.country_name||'?', countryCode:d.country_code||'' }) },
+  { url:'https://ip-api.com/json/?fields=status,org,as,country,countryCode,query', parse: d=>({ ip:d.query, org:d.org||'', asn:d.as||'', country:d.country||'?', countryCode:d.countryCode||'' }) },
+  { url:'https://ipwho.is/', parse: d=>({ ip:d.ip, org:d.org||d.connection?.org||'', asn:'AS'+(d.connection?.asn||''), country:d.country||'?', countryCode:d.country_code||'' }) },
+  { url:'https://freeipapi.com/api/json', parse: d=>({ ip:d.ipAddress, org:'', asn:'', country:d.countryName||'?', countryCode:d.countryCode||'' }) },
+];
+
+// WebRTC local IP detection — works without any API
+function getWebRTCIPs(){
+  return new Promise(resolve=>{
+    const ips = new Set();
+    try{
+      const pc = new RTCPeerConnection({iceServers:[
+        {urls:'stun:stun.l.google.com:19302'},
+        {urls:'stun:stun1.l.google.com:19302'},
+      ]});
+      pc.createDataChannel('');
+      pc.createOffer().then(o=>pc.setLocalDescription(o)).catch(()=>resolve([]));
+      pc.onicecandidate = e=>{
+        if(!e.candidate){
+          pc.close();
+          resolve([...ips]);
+          return;
+        }
+        const m = e.candidate.candidate.match(/([0-9]{1,3}(\.[0-9]{1,3}){3})/g);
+        if(m) m.forEach(ip=>{
+          // Filter out private/local IPs for display but keep them
+          ips.add(ip);
+        });
+      };
+      // Timeout after 3 seconds
+      setTimeout(()=>{ pc.close(); resolve([...ips]); }, 3000);
+    } catch(e){ resolve([]); }
+  });
+}
+
+// Fetch one API
+async function fetchISPApi(apiDef){
+  const r = await fetch(apiDef.url, {signal:AbortSignal.timeout(5000)});
+  const d = await r.json();
+  const parsed = apiDef.parse(d);
+  if(!parsed.ip) throw new Error('no ip');
+  return parsed;
+}
+
 async function detectISP(){
-  try{
-    const r = await fetch('https://ipapi.co/json/',{signal:AbortSignal.timeout(6000)});
-    const d = await r.json();
-    document.getElementById('ispName').textContent = d.org||d.asn||'نامشخص';
-    document.getElementById('userIp').textContent   = d.ip||'?';
-    document.getElementById('userCountry').textContent = d.country_name||'?';
-    const pill = document.getElementById('iranWarn');
-    if(d.country_code==='IR'){
-      pill.textContent='🇮🇷 ایران — نتایج دقیق!';
-      pill.style.color='var(--ac1)';
-    } else {
-      pill.textContent='⚠️ خارج از ایران';
-      pill.style.color='var(--ac4)';
+  document.getElementById('ispName').textContent = 'در حال شناسایی...';
+  document.getElementById('userIp').textContent  = '...';
+
+  // Step 1: WebRTC — get real IP instantly, no API needed
+  const rtcIPs = await getWebRTCIPs();
+  const publicIPs = rtcIPs.filter(ip=>
+    !ip.startsWith('192.168.')&&
+    !ip.startsWith('10.')&&
+    !ip.startsWith('172.')&&
+    !ip.startsWith('127.')&&
+    !ip.includes(':') // no IPv6
+  );
+  const bestRTCip = publicIPs[0] || rtcIPs[0] || null;
+
+  // Step 2: Try local IP database first (instant, no API)
+  if(bestRTCip){
+    document.getElementById('userIp').textContent = bestRTCip;
+    const local = lookupIP(bestRTCip);
+    if(local){
+      // Found in local DB — show immediately
+      document.getElementById('ispName').textContent     = local.isp;
+      document.getElementById('userCountry').textContent = local.country;
+      const pill = document.getElementById('iranWarn');
+      if(local.country==='IR'){
+        pill.textContent='🇮🇷 ایران — نتایج دقیق!';
+        pill.style.color='var(--ac1)';
+      } else {
+        pill.textContent='⚠️ خارج از ایران ('+local.country+')';
+        pill.style.color='var(--ac4)';
+      }
+      showISPProfile(local.isp, local.isp);
+      // Still try API in background to get more info
+      tryAPIsBackground(bestRTCip);
+      return;
     }
-    showISPProfile(d.org||'');
-  } catch(e){
-    document.getElementById('ispName').textContent='نامشخص';
-    document.getElementById('iranWarn').textContent='❓ نامشخص';
+  }
+
+  // Step 3: Local DB miss — try APIs in parallel
+  const apiPromises = ISP_APIS.map(api=>fetchISPApi(api).catch(()=>null));
+  let data = null;
+  for(const p of apiPromises){
+    const r = await p;
+    if(r && r.ip){ data=r; break; }
+  }
+
+  if(!data){
+    document.getElementById('ispName').textContent = 'نامشخص (API بلاک است)';
+    document.getElementById('iranWarn').textContent = bestRTCip
+      ? '⚠️ IP یافت شد ولی اپراتور نامشخص'
+      : '❓ نامشخص';
+    if(bestRTCip) document.getElementById('userIp').textContent = bestRTCip;
+    showISPProfile('default','نامشخص');
+    return;
+  }
+
+  // Use WebRTC IP if available (more accurate than API IP)
+  if(bestRTCip) data.ip = bestRTCip;
+
+  const ispKey   = matchISP(data.asn, data.org);
+  const ispLabel = ispKey!=='default' ? ispKey : (data.org||data.asn||'نامشخص');
+
+  document.getElementById('ispName').textContent     = ispLabel;
+  document.getElementById('userIp').textContent      = data.ip;
+  document.getElementById('userCountry').textContent = data.country;
+
+  const pill = document.getElementById('iranWarn');
+  if(data.countryCode==='IR'){
+    pill.textContent='🇮🇷 ایران — نتایج دقیق!';
+    pill.style.color='var(--ac1)';
+  } else {
+    pill.textContent='⚠️ خارج از ایران ('+data.country+')';
+    pill.style.color='var(--ac4)';
+  }
+  showISPProfile(ispKey, ispLabel);
+}
+
+// Try APIs in background after local DB hit — update if we get better info
+async function tryAPIsBackground(rtcIP){
+  for(const api of ISP_APIS){
+    try{
+      const r = await fetchISPApi(api);
+      if(r && r.ip){
+        const ispKey   = matchISP(r.asn, r.org);
+        const ispLabel = ispKey!=='default' ? ispKey : (r.org||r.asn||'');
+        if(ispLabel){
+          document.getElementById('ispName').textContent = ispLabel;
+          document.getElementById('userCountry').textContent = r.country;
+          showISPProfile(ispKey, ispLabel);
+        }
+        break;
+      }
+    } catch(e){ continue; }
   }
 }
 
-function showISPProfile(org){
-  let key='default';
-  for(const k of Object.keys(ISP_PROFILES)){
-    if(org.toLowerCase().includes(k.toLowerCase())){key=k;break;}
+// Match ISP using ASN first (most accurate), then keywords
+function matchISP(asn, org){
+  const asnClean = (asn||'').toUpperCase().replace(/\s.*/,'');
+  const orgLower = (org||'').toLowerCase();
+  for(const rule of ISP_RULES){
+    if(asnClean && rule.asns.includes(asnClean)) return rule.key;
+    if(rule.keywords.some(kw=>orgLower.includes(kw))) return rule.key;
   }
-  document.getElementById('ispProfileName').textContent = key==='default'?'اپراتور شما':key;
-  document.getElementById('ispRec').innerHTML = ISP_PROFILES[key].map(ip=>
+  return 'default';
+}
+
+function showISPProfile(ispKey, ispLabel){
+  const ips  = ISP_PROFILES[ispKey] || ISP_PROFILES['default'];
+  const name = ispKey !== 'default' ? ispKey : (ispLabel || 'اپراتور شما');
+  document.getElementById('ispProfileName').textContent = name;
+  document.getElementById('ispRec').innerHTML = ips.map(ip=>
     `<span class="ip-chip" onclick="addIP('${ip}')" title="افزودن به لیست">${ip}</span>`
   ).join('');
-  document.getElementById('ispProfileCard').style.display='block';
+  document.getElementById('ispProfileCard').style.display = 'block';
 }
 
 function addIP(ip){
@@ -817,39 +1029,45 @@ function whichCdn(ip){
   return'?';
 }
 
-// ---- TEST IP — direct from user's browser ----
-function singleTest(ip,tms){
+// ---- TCP REACHABILITY TEST ----
+// Tests if the CDN IP is reachable from the user's network.
+// Uses fetch() in no-cors mode — fast TCP connect check.
+// Note: browser cannot verify actual data transfer or CDN fronting.
+// For real CDN fronting verification, use the bash scripts.
+
+function singleTest(ip, tms){
   return new Promise(resolve=>{
-    const start=performance.now();
-    let done=false;
-    const fin=(ok)=>{
-      if(done)return;done=true;clearTimeout(timer);
-      const ms=performance.now()-start;
-      resolve(ok?ms:null);
+    const start = performance.now();
+    let done = false;
+    const fin = (ok)=>{
+      if(done)return; done=true; clearTimeout(timer);
+      const ms = performance.now()-start;
+      resolve(ok ? ms : null);
     };
-    const timer=setTimeout(()=>fin(false),tms);
-    fetch(`https://${ip}/`,{method:'HEAD',mode:'no-cors',cache:'no-store'})
+    const timer = setTimeout(()=>fin(false), tms);
+    fetch(`https://${ip}/`, {method:'HEAD', mode:'no-cors', cache:'no-store'})
       .then(()=>fin(true))
       .catch(()=>{
-        const ms=performance.now()-start;
-        fin(ms<tms*0.85);
+        const ms = performance.now()-start;
+        fin(ms < tms*0.85);
       });
   });
 }
 
-async function testIP(ip,tms,reps){
-  const lats=[];
-  for(let i=0;i<reps;i++){
-    const l=await singleTest(ip,tms);
-    if(l===null)return{ip,alive:false,latency:null,stability:0,cdn:whichCdn(ip)};
+async function testIP(ip, tms, reps){
+  const cdn = whichCdn(ip);
+  const lats = [];
+  for(let i=0; i<reps; i++){
+    const l = await singleTest(ip, tms);
+    if(l===null) return {ip, alive:false, latency:null, stability:0, cdn};
     lats.push(l);
   }
-  const avg=Math.round(lats.reduce((a,b)=>a+b,0)/lats.length);
-  const variance=lats.length>1
-    ?Math.round(Math.sqrt(lats.map(l=>(l-avg)**2).reduce((a,b)=>a+b,0)/lats.length))
-    :0;
-  const stability=lats.length>1?Math.max(0,100-Math.round(variance/avg*100)):100;
-  return{ip,alive:true,latency:avg,stability,cdn:whichCdn(ip)};
+  const avg = Math.round(lats.reduce((a,b)=>a+b,0)/lats.length);
+  const variance = lats.length>1
+    ? Math.round(Math.sqrt(lats.map(l=>(l-avg)**2).reduce((a,b)=>a+b,0)/lats.length))
+    : 0;
+  const stability = lats.length>1 ? Math.max(0,100-Math.round(variance/avg*100)) : 100;
+  return {ip, alive:true, latency:avg, stability, cdn};
 }
 
 async function pool(items,worker,concurrency,onDone){
@@ -959,7 +1177,7 @@ function renderTbl(){
     if(!a.alive&&b.alive)return 1;
     return a.latency-b.latency;
   });
-  if(!res.length){tbody.innerHTML='<tr><td colspan="7"><div class="empty">🔍 نتیجه‌ای نیست.</div></td></tr>';return;}
+  if(!res.length){tbody.innerHTML='<tr><td colspan="8"><div class="empty">🔍 نتیجه‌ای نیست.</div></td></tr>';return;}
   let i=0;
   tbody.innerHTML=res.map(r=>{
     i++;
@@ -967,10 +1185,12 @@ function renderTbl(){
     const q=r.alive?(r.latency<150?'<span class="badge b-ex">عالی</span>':r.latency<400?'<span class="badge b-gd">خوب</span>':r.latency<900?'<span class="badge b-md">متوسط</span>':'<span class="badge b-sl">کند</span>'):'—';
     const cdn=r.cdn!=='?'?`<span class="badge b-cdn">${r.cdn}</span>`:'—';
     const stab=r.alive?(r.stability>=90?'🟢':r.stability>=70?'🟡':'🔴')+' '+r.stability+'%':'—';
+
     return`<tr>
       <td style="color:var(--txt2);font-family:'JetBrains Mono',monospace">${i}</td>
       <td class="ip-mono">${r.ip}</td>
-      <td>${cdn}</td><td>${st}</td>
+      <td>${cdn}</td>
+      <td>${st}</td>
       <td style="font-family:'JetBrains Mono',monospace">${r.alive?r.latency+' ms':'—'}</td>
       <td style="font-size:.76rem">${stab}</td>
       <td>${q}</td>
